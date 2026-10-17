@@ -1,5 +1,5 @@
 // 離線快取：頁面走「先網路、失敗用快取」，照片／地圖／字型走「先快取、沒有再下載並存起來」。
-const SHELL = "kyushu-shell-4d2c0e5992";
+const SHELL = "kyushu-shell-851d8c2e7b";
 const MEDIA = "kyushu-media";
 const SHELL_FILES = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"];
 
