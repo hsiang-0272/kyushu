@@ -178,11 +178,14 @@ main{padding-bottom:calc(var(--nav-h) + 36px + env(safe-area-inset-bottom,0px))}
 .history-label .line{width:16px;height:1.5px;background:var(--gold)}
 .history-label .rule{flex:1;height:.5px;background:var(--gold-l)}
 .history-text p{margin:6px 0 0;text-indent:2em;font-size:14.5px;line-height:1.95;color:var(--ink2);text-align:justify}
-.photo-grid{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin-top:12px}
-.photo-grid figure{margin:0;flex:1 1 calc(50% - 3px);min-width:0}
+.photo-grid{display:flex;flex-direction:column;gap:10px;margin-top:12px}  /* 使用者 2026-10-17：景點照片不並排，一張一列全寬 */
+.photo-grid figure{margin:0;width:100%;min-width:0}
 .photo-grid img{display:block;width:100%;height:auto;border-radius:4px;cursor:zoom-in}
 .stop-feature-note{margin-top:8px;font-size:13.5px;line-height:1.7;color:var(--note);font-style:italic}
 .stop-feature-note::before{content:"※ "}
+.stop-feature-inset{margin:12px 0 6px;text-align:center}
+.stop-feature-inset img{display:block;width:100%;height:auto;border-radius:6px;border:1px solid var(--gold-l);background:#fff}
+.stop-feature-inset-cap{font-size:12.5px;line-height:1.5;color:var(--ink2);margin-top:4px}
 .stop-acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .act{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:5px 13px;font-size:13px;text-decoration:none;color:var(--navy)}
 .act svg{width:14px;height:14px;stroke:var(--gold-d);fill:none;stroke-width:1.8;stroke-linejoin:round}
@@ -1649,7 +1652,7 @@ main{padding-bottom:calc(var(--nav-h) + 36px + env(safe-area-inset-bottom,0px))}
   <button class="tab" type="button" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>行程</button>
   <button class="tab" type="button" data-tab="map"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>地圖</button>
   <button class="tab home" type="button" data-tab="home"><span class="disc"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></span>首頁</button>
-  <button class="tab" type="button" data-tab="stay"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg>住宿</button>
+  <button class="tab" type="button" data-tab="stay"><svg viewBox="0 0 24 24"><path d="M3 6v13M21 13v6M3 16h18M3 13h18"/><rect x="5" y="9.5" width="4.5" height="3.5" rx="1.2"/><path d="M11 13v-2.5A1.5 1.5 0 0 1 12.5 9H19a2 2 0 0 1 2 2v2"/></svg>住宿</button>
   <button class="tab" type="button" data-tab="spots"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>景點</button>
 </div></nav>
 
