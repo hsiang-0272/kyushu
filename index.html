@@ -2178,7 +2178,7 @@ function renderWx(){
   } else {
     st.innerHTML=`<span class="err">${esc(wxErr||"正在讀取日本氣象廳最新預報…")}</span>${wxErr?`<button type="button" class="wx-refresh" id="wxRefresh">再試一次</button><br>在 Claude 頁面內開啟時無法連外；請用「加入主畫面」的網站版查看即時預報。下方先顯示歷年同期概況。`:""}`;
   }
-  const rb=$("#wxRefresh"); if(rb) rb.onclick=()=>loadWx(true);
+  const rb=$("#wxRefresh"); if(rb) rb.onclick=()=>{ rb.disabled=true; rb.textContent="更新中…"; loadWx(true); };
   renderWxHome();
 }
 // 16 天全球模式：每個地點只留「每天騎乘時段的最大風速、陣風、降雨機率、雨量」，存手機時才不會太大
@@ -2195,13 +2195,14 @@ async function loadWx(force){
   const offices=[...new Set(OMPTS.map(p=>p.o))];
   try{
     const jma={};
-    await Promise.all(offices.map(async o=>{ const r=await fetch(`https://www.jma.go.jp/bosai/forecast/data/forecast/${o}.json`,{cache:"no-store"}); if(!r.ok) throw new Error(o); jma[o]=await r.json(); }));
+    await Promise.allSettled(offices.map(async o=>{ const r=await fetch(`https://www.jma.go.jp/bosai/forecast/data/forecast/${o}.json`,{cache:"no-store"}); if(!r.ok) throw new Error(o); jma[o]=await r.json(); }));
     let om=[];
     try{ const r=await fetch(`https://api.open-meteo.com/v1/jma?latitude=${OMPTS.map(p=>p.lat).join(",")}&longitude=${OMPTS.map(p=>p.lon).join(",")}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=Asia%2FTokyo&forecast_days=11`);
       if(r.ok){ const j=await r.json(); om=Array.isArray(j)?j:[j]; } }catch(e){}
     let gf=[];
     try{ const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${OMPTS.map(p=>p.lat).join(",")}&longitude=${OMPTS.map(p=>p.lon).join(",")}&hourly=wind_speed_10m,wind_gusts_10m,precipitation_probability,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min&wind_speed_unit=ms&timezone=Asia%2FTokyo&forecast_days=16`);
       if(r.ok){ const j=await r.json(); gf=(Array.isArray(j)?j:[j]).map(compactGf); } }catch(e){}
+    if(!Object.keys(jma).length&&!om.length&&!gf.length) throw new Error("all");
     wxData={t:Date.now(),jma,om,gf}; wxErr=null;
     store.set("wx",JSON.stringify(wxData));
   }catch(e){ wxErr="目前無法連線取得天氣預報"; }
