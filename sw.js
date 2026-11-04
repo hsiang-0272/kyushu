@@ -1,5 +1,5 @@
 // 離線快取：頁面走「先網路、失敗用快取」，照片／地圖／字型走「先快取、沒有再下載並存起來」。
-const SHELL = "kyushu-shell-9844fc0982";
+const SHELL = "kyushu-shell-7f9b61f3e8";
 const MEDIA = "kyushu-media";
 const LIVE = /(^|\.)(jma\.go\.jp|open-meteo\.com)$/;
 const SHELL_FILES = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"];
