@@ -531,6 +531,83 @@ main{padding-bottom:calc(var(--nav-h) + 36px + env(safe-area-inset-bottom,0px))}
 
 @media (min-width:700px){.culture-box{display:grid;grid-template-columns:repeat(3,1fr)}.c-item+.c-item{border-top:0;border-left:.5px solid var(--gold-l)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/*UXV2-CSS-BEGIN*/
+/* ===== UX v2（2026-11-25 使用者回饋：一天要滑太久、頂部太佔空間、下一站常猜錯、首頁太雜） ===== */
+/* 頂部：一行標題＋精簡日期列，拿掉滑桿 */
+.slider{display:none!important}
+.brand{padding-top:8px;align-items:center}
+.brand .eyebrow{display:none}
+.brand h1{font-size:19px;letter-spacing:.04em}
+.brand h1 small{font-size:12px;margin-left:6px}
+.gear{width:36px;height:36px}
+.gear svg{width:18px;height:18px}
+.top.compact .brand{margin-top:-44px}
+.strip{gap:6px;padding:8px 2px 8px}
+.pill{width:52px;padding:4px 0 3px}
+.pill .wd{font-style:normal;font-size:11.5px;letter-spacing:0;font-weight:700}
+.pill .dn{font-size:19px;line-height:1.15}
+.pill .mo{font-size:10.5px}
+.pill.is-today:not([aria-pressed="true"]){border-color:var(--gold);box-shadow:inset 0 -3px 0 var(--gold)}
+
+/* 首頁：舊的騎乘卡、三站預覽、功能總覽格子不再顯示；旅途中不顯示封面與倒數 */
+#ride,.today,#v-home .features{display:none!important}
+body.live #v-home .cover,body.live #v-home .ticket{display:none}
+#v-home .banner{padding:10px 14px;min-height:0}
+#v-home .banner .ic{width:30px;height:auto}
+#v-home .banner .s{display:none}
+
+/* 今天行程卡 */
+.tl2{border:1px solid var(--gold-l);border-radius:12px;background:var(--card);padding:12px 12px 10px;margin-bottom:14px}
+.tl2-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.tl2-h b{font-size:17px}
+.tl2-h .lv{font-size:12px;font-weight:700;color:#fff;background:var(--navy);border-radius:999px;padding:1px 9px;flex:none}
+.tl2-h .lv.pre{background:var(--gold-m)}
+.tl2-theme{font-size:13px;color:var(--ink2);line-height:1.5;margin-top:2px}
+.tl2-back{margin-top:8px;width:100%;border:1px dashed var(--gold);background:#FFFDF8;border-radius:8px;padding:6px;font-size:13.5px;color:var(--gold-d)}
+.tl2-kt{margin-top:8px;font-size:13.5px;line-height:1.5;background:#FFF4E8;border-radius:8px;padding:6px 10px}
+.tl2-kt .cd{color:#B4561F;font-weight:700;margin-left:6px;white-space:nowrap}
+.tl2-list{list-style:none;margin:8px 0 0;padding:0}
+.tl2-list li{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:1px dotted var(--rule)}
+.tl2-main{display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start;text-align:left;border:0;background:none;padding:0;min-width:0}
+.tl2-main .num{width:26px;height:26px;border-radius:50%;background:var(--dc,var(--navy));color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;margin-top:1px}
+.tl2-main .tx{min-width:0;display:flex;flex-direction:column}
+.tl2-main .t{font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums;line-height:1.4}
+.tl2-main .nm{font-size:15.5px;font-weight:700;line-height:1.35;color:var(--navy)}
+.tl2-main .lg{font-size:12px;color:var(--ink3);line-height:1.4;margin-top:1px}
+.tl2-main .tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:0 7px;margin-left:6px;vertical-align:2px;line-height:1.6}
+.tl2-go{display:flex;flex-direction:column;gap:5px}
+.tl2-go a{display:block;text-align:center;font-size:12.5px;font-weight:700;text-decoration:none;border-radius:7px;padding:4px 8px;min-width:68px;background:var(--gold-l);color:var(--navy)}
+.tl2-go a.ap{background:var(--navy);color:var(--paper)}
+.tl2-list li.past .tl2-main{opacity:.5}
+.tl2-list li.past .tl2-go a{background:none;border:1px solid var(--rule);color:var(--ink3)}
+.tl2-list li.now,.tl2-list li.next{background:#FFF8E6;margin:0 -12px;padding:8px 12px;border-top-color:transparent}
+.tl2-list li.now .tag{background:var(--navy);color:#fff}
+.tl2-list li.next .tag{background:var(--gold);color:var(--navy)}
+.tl2-hotel{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-top:1px solid var(--gold-l);margin-top:4px;padding-top:9px}
+.tl2-hotel .hn{font-size:14px;line-height:1.45}
+.tl2-hotel .hn small{display:block;font-size:12px;color:var(--ink3)}
+.tl2-src{font-size:12px;color:var(--ink3);line-height:1.55;margin-top:8px}
+.tl2-src button{border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:2px 10px;font-size:12.5px;margin-top:6px;color:var(--navy)}
+.tl2-src .msg{display:block;color:var(--gold-d)}
+
+/* 行程頁：每站預設收合，只留時間、站名、提醒、導航；點「介紹與照片」才展開 */
+#v-plan .fold:not(.open) :is(.stop-feature-name-en,.stop-feature-meta,.stop-feature-lede,.history-block,.photo-grid,.stop-feature-inset,.anime-compare,.anime-compare-label,.anime-compare-grid,.anime-compare-caption,.sinfo,.ticket-box .tb-detail){display:none}
+#v-plan .fold .stop-acts{margin-top:8px}
+.fold-btn{display:flex;align-items:center;gap:6px;width:100%;margin-top:8px;border:0;border-top:1px dashed var(--rule);background:none;padding:7px 2px 0;font-size:13.5px;color:var(--gold-d);text-align:left}
+.fold-btn .chev{display:inline-block;transition:transform .2s}
+.open>.fold-btn .chev{transform:rotate(180deg)}
+#v-plan .day:not(.allopen) .flow>:is(.spotlight-wrap,.narrative,.culture-box,.stop-album,.tips-box){display:none}
+.day-tools{display:flex;gap:8px;margin:10px 0 4px}
+.day-tools button{flex:1;border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:6px 8px;font-size:13.5px;color:var(--navy)}
+.day-tools button[aria-pressed="true"]{background:var(--navy);color:var(--paper);border-color:var(--navy)}
+#v-plan .routes.rfold .rt,#v-plan .routes.rfold .rt-note,#v-plan .routes.rfold p{display:none}
+#v-plan .routes .kit-h{cursor:pointer}
+#v-plan .routes .kit-h::after{content:"　▾ 展開";font-size:12px;color:var(--gold-d);font-style:normal}
+#v-plan .routes:not(.rfold) .kit-h::after{content:"　▴ 收起"}
+#v-plan .is-now,#v-plan .is-next{box-shadow:-4px 0 0 var(--gold);border-radius:4px}
+.now-tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:0 8px;line-height:1.7;background:var(--gold);color:var(--navy);margin-left:6px;vertical-align:middle}
+.is-now .now-tag{background:var(--navy);color:#fff}
+/*UXV2-CSS-END*/
 </style>
 </head>
 <body>
@@ -2284,6 +2361,133 @@ $("#rideRoute").onclick=()=>{ const n=liveDay()||day; setDay(n,true); setTab("pl
 setInterval(()=>{ renderRide(); renderKeyTimes(); },30000);
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"){ renderRide(); renderKeyTimes(); } });
 
+/*UXV2-JS-BEGIN*/
+// ===== UX v2（2026-11-25）：插在主程式「// boot」之前，覆寫 renderToday／renderRide／gotoStop =====
+// 使用者回饋：一天要滑太久、頂部太佔空間、「下一站」常猜錯、首頁太雜。
+// 1) 日期列改中文週幾；2) 首頁改成「今天整條行程」卡：每站一行＋Google／Apple 導航，目前／下一站標亮，猜錯也不影響點別站；
+// 3) 行程頁每站預設收合，只留時間、站名、提醒、導航；4) 旅途中打開一律回首頁。
+(()=>{
+  const ZWD=["週日","週一","週二","週三","週四","週五","週六"];
+  // 舊站（九州）沒有 appleNav：這裡補一個，並替每站導航補上 Apple 地圖按鈕
+  const aNav = typeof appleNav==="function" ? appleNav : (la,lo)=>`https://maps.apple.com/?daddr=${la},${lo}&dirflg=d`;
+  $$("#v-plan .stop-acts").forEach(acts=>{
+    if($(".act-apple",acts)) return;
+    const host=acts.closest("[id^=s]"), m=host&&host.id.match(/^s(\d+)-(\d+)$/); if(!m) return;
+    const s=(DAYS[+m[1]]||{stops:[]}).stops.find(x=>+x.n===+m[2]); if(!s||s.lat==null) return;
+    const g=$("a.act",acts); const a=document.createElement("a"); a.className="act act-apple"; a.target="_blank"; a.rel="noopener";
+    a.href=aNav(s.lat,s.lon); a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg>Apple 導航`;
+    if(g){ if(g.textContent.trim()==="導航") g.lastChild.textContent="Google 導航"; g.after(a); } else acts.prepend(a);
+  });
+  $$(".pill").forEach(p=>{ const n=+p.dataset.day, d=new Date(START); d.setDate(d.getDate()+n-1);
+    p.innerHTML=`<span class="wd">${ZWD[d.getDay()]}</span><span class="dn">${d.getDate()}</span><span class="mo">${d.getMonth()+1}月・D${n}</span>`; });
+  const tt=$("#todayTitle"); if(tt){ const h=tt.closest(".sec-h"); if(h) h.hidden=true; }
+  $$("#v-home .sec-h").forEach(h=>{ if(/功能總覽/.test(h.textContent)) h.hidden=true; });
+
+  // ---- 今天行程卡 ----
+  const card=document.createElement("section"); card.className="tl2"; card.id="tl2"; card.setAttribute("aria-label","今天行程");
+  const home=$("#v-home"), tick=$(".ticket",home), cover=$(".cover",home);
+  if(tick){ home.prepend(tick); tick.after(card); } else home.prepend(card);
+  const tools=$(".tools",home); if(tools) card.after(tools);
+  if(cover) home.appendChild(cover);  // 封面移到最下面，不再擋住行程
+  let gps="";
+  const navBtns=(g,pt)=>`<div class="tl2-go">${g?`<a href="${esc(g)}" target="_blank" rel="noopener">Google</a>`:""}${pt&&pt.lat!=null?`<a class="ap" href="${aNav(pt.lat,pt.lon)}" target="_blank" rel="noopener">Apple</a>`:""}</div>`;
+  function status(n){
+    const live=liveDay(), st=DAYS[n].stops; if(live!==n) return {cur:-1,nx:-1,live:false,how:""};
+    const now=tokyoNow().min;
+    let cur=st.findIndex(s=>{ const [a,b]=span(s); return now>=a&&now<=b; });
+    let nx=cur>=0?cur+1:st.findIndex(s=>span(s)[0]>now); if(nx<0) nx=st.length;
+    let how="clock"; const ov=readArr(n);
+    if(ov&&ov.i>=0&&ov.i<st.length&&ov.i>=Math.max(cur,nx-1)){ cur=ov.i; nx=ov.i+1; how=ov.how; }
+    return {cur,nx,live:true,how,now};
+  }
+  function renderTL(){
+    const live=liveDay(), n=day, m=DAYS[n]; if(!m) return;
+    document.body.classList.toggle("live",!!live);
+    $$(".pill").forEach(p=>p.classList.toggle("is-today",+p.dataset.day===live));
+    const S=status(n), st=m.stops;
+    const lab = live===n ? `<span class="lv">今天</span>` : live ? `<span class="lv pre">預覽</span>` : (tokyoNow().date<dateOf(1) ? `<span class="lv pre">行前預覽</span>` : `<span class="lv pre">回顧</span>`);
+    let h=`<div class="tl2-h"><b>Day ${n}・${esc(m.date)}</b>${lab}</div><div class="tl2-theme">${esc(m.theme)}</div>`;
+    if(live&&live!==n) h+=`<button type="button" class="tl2-back" data-tl-today>回到今天（Day ${live}）</button>`;
+    const kts=KT[n]||[];
+    if(S.live){ const up=kts.filter(k=>toMin(k.t)>=S.now), k=up.find(k=>k.hot)||up[0];
+      if(k) h+=`<div class="tl2-kt">⏰ <b>${k.t}</b> ${esc(k.l)}<span class="cd">還有 ${left(toMin(k.t)-S.now)}</span></div>`; }
+    else { const k=kts.find(k=>k.hot); if(k) h+=`<div class="tl2-kt">⏰ 今天要趕：<b>${k.t}</b> ${esc(k.l)}</div>`; }
+    h+=`<ol class="tl2-list" style="--dc:${m.dc||"var(--navy)"}">`;
+    st.forEach((s,i)=>{
+      const cls = !S.live ? "" : i===S.cur ? "now" : i===S.nx ? "next" : i<(S.cur>=0?S.cur:S.nx) ? "past" : "";
+      const tag = cls==="now" ? `<span class="tag">${S.how==="gps"?"定位：在這站":S.how==="manual"?"已到":"應在這站"}</span>` : cls==="next" ? `<span class="tag">下一站</span>` : "";
+      const prev=st[i-1];
+      h+=`<li class="${cls}"><button type="button" class="tl2-main" data-tl-n="${s.n}"><span class="num">${s.n}</span><span class="tx"><span class="t">${esc(s.icon||"")} ${esc(s.t)}</span><span class="nm">${esc(s.name)}${tag}</span>${prev&&prev.leg?`<span class="lg">${esc(prev.leg)}</span>`:""}</span></button>${navBtns(s.link,s)}</li>`;
+    });
+    h+=`</ol>`;
+    const hc=hotelCards.find(c=>+c.dataset.day===n), ha=hc&&hc.querySelector(".hotel-name a");
+    if(ha){ const nm=ha.textContent.replace(/^📍/,"").trim(); const hs=[...st].reverse().find(x=>x.lat!=null&&nm.includes(x.name));
+      h+=`<div class="tl2-hotel"><div class="hn">🏠 今晚住 <b>${esc(nm)}</b><small>點右邊直接導航到住處</small></div>${navBtns(ha.href,hs)}</div>`; }
+    else if(n===ND) h+=`<div class="tl2-hotel"><div class="hn">✈ ${esc(META.last_day_note||"今天是賦歸日。")}</div></div>`;
+    if(S.live){
+      h+=`<div class="tl2-src">標亮的「${S.how==="clock"?"應在這站／下一站":"目前位置"}」是${S.how==="clock"?"依日本時間對時刻表推算，不是定位":S.how==="gps"?"用定位判斷":"你手動標記"}的；行程延誤時直接按要去那一站的導航就好。`;
+      if(S.how!=="clock") h+=` <button type="button" data-tl-reset>改回依時刻表</button>`;
+      if(window.__PWA__&&navigator.geolocation) h+=` <button type="button" data-tl-gps>📍 用定位找我在哪一站</button>`;
+      if(gps) h+=`<span class="msg">${esc(gps)}</span>`;
+      h+=`</div>`;
+    } else h+=`<div class="tl2-src">點站名看介紹與照片；旅途中打開會自動切到當天並標出目前位置。</div>`;
+    card.innerHTML=h;
+    markPlan();
+  }
+  card.addEventListener("click",e=>{
+    const b=e.target.closest("[data-tl-n]"); if(b){ gotoStop(day,+b.dataset.tlN); return; }
+    if(e.target.closest("[data-tl-today]")){ setDay(liveDay()); return; }
+    if(e.target.closest("[data-tl-reset]")){ store.set("arr"+liveDay(),""); gps=""; renderTL(); return; }
+    if(e.target.closest("[data-tl-gps]")){
+      const n=liveDay(); if(!n) return; gps="正在取得定位…"; renderTL();
+      navigator.geolocation.getCurrentPosition(p=>{
+        const {latitude:la,longitude:lo}=p.coords, st=DAYS[n].stops; let best=-1,bd=1e9;
+        st.forEach((s,i)=>{ if(s.lat==null) return; const d=km(la,lo,s.lat,s.lon); if(d<bd){bd=d;best=i;} });
+        if(best>=0&&bd<=1.5){ store.set("arr"+n,JSON.stringify({i:best,how:"gps"})); gps=`你在「${st[best].name}」附近（約 ${bd<1?Math.round(bd*1000)+" 公尺":bd.toFixed(1)+" 公里"}）。`; }
+        else gps=`目前不在任何一站附近（離最近的「${best>=0?st[best].name:"—"}」約 ${bd.toFixed(1)} 公里），仍依時刻表推算。`;
+        renderTL();
+      }, e=>{ gps=e.code===1?"沒有定位權限：請到 iPhone「設定 › 隱私權 › 定位服務」允許。":"暫時無法取得定位，請稍後再試。"; renderTL(); },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+    }
+  });
+
+  // ---- 行程頁：每站收合 ----
+  $$("#v-plan .day").forEach(sec=>{
+    const n=+sec.dataset.day;
+    $$(".stop-feature,.stop-bonus",sec).forEach(s=>{
+      const imgs=$$(".photo-grid img,.anime-compare img",s).length;
+      const hasMore=imgs||$(".stop-feature-lede,.history-block,.stop-feature-meta,.sinfo",s);
+      if(!hasMore) return;
+      s.classList.add("fold");
+      const b=document.createElement("button"); b.type="button"; b.className="fold-btn";
+      b.innerHTML=`<span class="chev">▾</span><span class="fl">${s.classList.contains("bar-card")?"步行・營業時間・價格・介紹":"營業時間・介紹"}${imgs?`・照片 ${imgs} 張`:""}</span>`;
+      b.onclick=()=>s.classList.toggle("open");
+      const acts=$(":scope>.stop-acts",s); if(acts) acts.after(b); else s.appendChild(b);
+    });
+    const r=$(".routes",sec); if(r){ r.classList.add("rfold"); const k=$(".kit-h",r); if(k) k.onclick=()=>r.classList.toggle("rfold"); }
+    const tb=document.createElement("div"); tb.className="day-tools";
+    tb.innerHTML=`<button type="button" aria-pressed="false">全部展開：介紹與照片</button>`;
+    const btn=tb.firstElementChild;
+    btn.onclick=()=>{ const on=!sec.classList.contains("allopen"); sec.classList.toggle("allopen",on); $$(".fold",sec).forEach(s=>s.classList.toggle("open",on)); btn.setAttribute("aria-pressed",String(on)); btn.textContent=on?"全部收起":"全部展開：介紹與照片"; };
+    const nav=$(".stopnav",sec); (nav||$(".day-hero",sec)).after(tb);
+  });
+  function markPlan(){
+    $$("#v-plan .is-now,#v-plan .is-next").forEach(e=>e.classList.remove("is-now","is-next"));
+    $$("#v-plan .now-tag").forEach(e=>e.remove());
+    const live=liveDay(); if(!live) return; const S=status(live), st=DAYS[live].stops;
+    [[S.cur,"is-now","目前"],[S.nx,"is-next","下一站"]].forEach(([i,c,t])=>{ const s=st[i]; if(!s) return; const el=$(`#s${live}-${s.n}`); if(!el) return; el.classList.add(c);
+      const sp=document.createElement("span"); sp.className="now-tag"; sp.textContent=t; const nm=$(".stop-feature-name-zh,.stop-name,.sname",el); if(nm) nm.after(sp); });
+  }
+
+  // ---- 覆寫：今天行程卡取代舊的三站預覽與騎乘卡 ----
+  const _rt=renderToday;  // 原本的會填倒數卡（幾天後出發），保留
+  renderToday=function(){ _rt(); renderTL(); };
+  renderRide=function(){ renderTL(); };
+  const _goto=gotoStop;
+  gotoStop=function(d,n){ const el=$(`#s${d}-${n}`); if(el) el.classList.add("open"); _goto(d,n); };
+  // 旅途中打開一律回首頁（今天行程卡），不停在上次的分頁
+  if(liveDay()) store.set("tab","home");
+})();
+/*UXV2-JS-END*/
 // boot
 const sd=+store.get("day"), now=new Date(), off=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-START)/864e5);
 setDay(off>=0&&off<ND ? off+1 : (sd>=1&&sd<=ND ? sd : 1), true);
