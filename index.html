@@ -607,6 +607,29 @@ body.live #v-home .cover,body.live #v-home .ticket{display:none}
 #v-plan .is-now,#v-plan .is-next{box-shadow:-4px 0 0 var(--gold);border-radius:4px}
 .now-tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:0 8px;line-height:1.7;background:var(--gold);color:var(--navy);margin-left:6px;vertical-align:middle}
 .is-now .now-tag{background:var(--navy);color:#fff}
+
+/* ===== 第二輪（2026-11-25）：站點介紹視窗、重要票券分頁 ===== */
+#sh-stop .panel-h h2{font-size:19px;line-height:1.35}
+#sh-stop .stop-intro>*{margin-top:4px;box-shadow:none}
+#sh-stop .stop-feature-name-zh{text-decoration:none}
+#sh-stop .stop-acts{margin-top:12px}
+#v-spots .tk{border:1px solid var(--gold-l);border-radius:12px;background:var(--card);padding:12px 14px;margin:0 0 14px}
+#v-spots .tk h3{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 8px;font-size:17px;color:var(--navy)}
+#v-spots .tk h3 .ic{font-size:18px}
+#v-spots .tk h3 small{font-size:12px;font-weight:400;color:var(--ink3)}
+#v-spots .tk-docs{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+#v-spots .tk-docs .doc-btn{width:100%;justify-content:flex-start;text-align:left;margin:0}
+#v-spots .tk-row{border-top:1px dotted var(--rule);padding:10px 0 4px}
+#v-spots .tk-row:first-of-type{border-top:0;padding-top:2px}
+#v-spots .tk-d{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--gold-d)}
+#v-spots .tk-n{font-size:15.5px;font-weight:700;color:var(--navy);line-height:1.4;margin:1px 0 4px}
+#v-spots button.tk-n{border:0;background:none;padding:0;text-align:left;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+#v-spots .tk-row ul{margin:2px 0 4px;padding-left:18px;font-size:13.5px;line-height:1.65;color:var(--ink2)}
+#v-spots .tk-row .ticket-box{margin:6px 0}
+#v-spots .tk-more{margin-top:6px;border-top:1px dashed var(--rule);padding-top:6px}
+#v-spots .tk-more summary{font-size:13.5px;color:var(--gold-d);cursor:pointer}
+#v-spots .tk-more .logi{margin-top:8px}
+#sh-stop .stop-badge{display:none}
 /*UXV2-CSS-END*/
 </style>
 </head>
@@ -2369,14 +2392,16 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
 (()=>{
   const ZWD=["週日","週一","週二","週三","週四","週五","週六"];
   // 舊站（九州）沒有 appleNav：這裡補一個，並替每站導航補上 Apple 地圖按鈕
-  const aNav = typeof appleNav==="function" ? appleNav : (la,lo)=>`https://maps.apple.com/?daddr=${la},${lo}&dirflg=d`;
+  // 2026-11-25 第二輪：導航鈕只「打開該地點」，不直接開始導航（要導航自己在地圖上按路線）
+  const aPlace=(la,lo,q)=>`https://maps.apple.com/?ll=${la},${lo}&q=${encodeURIComponent(q||"目的地")}`;
+  const gPlace=h=>{ try{ const u=new URL(h,location.href); if(/\/maps\/dir\//.test(u.pathname)){ const d=u.searchParams.get("destination"); if(d) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d)}`; } }catch(e){} return h; };
   $$("#v-plan .stop-acts").forEach(acts=>{
     if($(".act-apple",acts)) return;
     const host=acts.closest("[id^=s]"), m=host&&host.id.match(/^s(\d+)-(\d+)$/); if(!m) return;
     const s=(DAYS[+m[1]]||{stops:[]}).stops.find(x=>+x.n===+m[2]); if(!s||s.lat==null) return;
     const g=$("a.act",acts); const a=document.createElement("a"); a.className="act act-apple"; a.target="_blank"; a.rel="noopener";
-    a.href=aNav(s.lat,s.lon); a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg>Apple 導航`;
-    if(g){ if(g.textContent.trim()==="導航") g.lastChild.textContent="Google 導航"; g.after(a); } else acts.prepend(a);
+    a.href=aPlace(s.lat,s.lon,s.name); a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg>Apple 地圖`;
+    if(g){ if(g.textContent.trim()==="導航") g.lastChild.textContent="Google 地圖"; g.after(a); } else acts.prepend(a);
   });
   $$(".pill").forEach(p=>{ const n=+p.dataset.day, d=new Date(START); d.setDate(d.getDate()+n-1);
     p.innerHTML=`<span class="wd">${ZWD[d.getDay()]}</span><span class="dn">${d.getDate()}</span><span class="mo">${d.getMonth()+1}月・D${n}</span>`; });
@@ -2390,7 +2415,7 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
   const tools=$(".tools",home); if(tools) card.after(tools);
   if(cover) home.appendChild(cover);  // 封面移到最下面，不再擋住行程
   let gps="";
-  const navBtns=(g,pt)=>`<div class="tl2-go">${g?`<a href="${esc(g)}" target="_blank" rel="noopener">Google</a>`:""}${pt&&pt.lat!=null?`<a class="ap" href="${aNav(pt.lat,pt.lon)}" target="_blank" rel="noopener">Apple</a>`:""}</div>`;
+  const navBtns=(g,pt,q)=>`<div class="tl2-go">${g?`<a href="${esc(gPlace(g))}" target="_blank" rel="noopener">Google</a>`:""}${pt&&pt.lat!=null?`<a class="ap" href="${esc(aPlace(pt.lat,pt.lon,q||pt.name))}" target="_blank" rel="noopener">Apple</a>`:""}</div>`;
   function status(n){
     const live=liveDay(), st=DAYS[n].stops; if(live!==n) return {cur:-1,nx:-1,live:false,how:""};
     const now=tokyoNow().min;
@@ -2422,20 +2447,20 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
     h+=`</ol>`;
     const hc=hotelCards.find(c=>+c.dataset.day===n), ha=hc&&hc.querySelector(".hotel-name a");
     if(ha){ const nm=ha.textContent.replace(/^📍/,"").trim(); const hs=[...st].reverse().find(x=>x.lat!=null&&nm.includes(x.name));
-      h+=`<div class="tl2-hotel"><div class="hn">🏠 今晚住 <b>${esc(nm)}</b><small>點右邊直接導航到住處</small></div>${navBtns(ha.href,hs)}</div>`; }
+      h+=`<div class="tl2-hotel"><div class="hn">🏠 今晚住 <b>${esc(nm)}</b><small>點右邊打開住處的地圖</small></div>${navBtns(ha.href,hs,nm)}</div>`; }
     else if(n===ND) h+=`<div class="tl2-hotel"><div class="hn">✈ ${esc(META.last_day_note||"今天是賦歸日。")}</div></div>`;
     if(S.live){
-      h+=`<div class="tl2-src">標亮的「${S.how==="clock"?"應在這站／下一站":"目前位置"}」是${S.how==="clock"?"依日本時間對時刻表推算，不是定位":S.how==="gps"?"用定位判斷":"你手動標記"}的；行程延誤時直接按要去那一站的導航就好。`;
+      h+=`<div class="tl2-src">標亮的「${S.how==="clock"?"應在這站／下一站":"目前位置"}」是${S.how==="clock"?"依日本時間對時刻表推算，不是定位":S.how==="gps"?"用定位判斷":"你手動標記"}的；行程延誤時直接按要去那一站的地圖就好。`;
       if(S.how!=="clock") h+=` <button type="button" data-tl-reset>改回依時刻表</button>`;
       if(window.__PWA__&&navigator.geolocation) h+=` <button type="button" data-tl-gps>📍 用定位找我在哪一站</button>`;
       if(gps) h+=`<span class="msg">${esc(gps)}</span>`;
       h+=`</div>`;
-    } else h+=`<div class="tl2-src">點站名看介紹與照片；旅途中打開會自動切到當天並標出目前位置。</div>`;
+    } else h+=`<div class="tl2-src">點站名看介紹與照片；Google／Apple 只打開該地點，要導航在地圖上按「路線」。旅途中打開會自動切到當天並標出目前位置。</div>`;
     card.innerHTML=h;
     markPlan();
   }
   card.addEventListener("click",e=>{
-    const b=e.target.closest("[data-tl-n]"); if(b){ gotoStop(day,+b.dataset.tlN); return; }
+    const b=e.target.closest("[data-tl-n]"); if(b){ const el=$(`#s${day}-${b.dataset.tlN}`); el?openIntro(el):gotoStop(day,+b.dataset.tlN); return; }
     if(e.target.closest("[data-tl-today]")){ setDay(liveDay()); return; }
     if(e.target.closest("[data-tl-reset]")){ store.set("arr"+liveDay(),""); gps=""; renderTL(); return; }
     if(e.target.closest("[data-tl-gps]")){
@@ -2478,6 +2503,100 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
       const sp=document.createElement("span"); sp.className="now-tag"; sp.textContent=t; const nm=$(".stop-feature-name-zh,.stop-name,.sname",el); if(nm) nm.after(sp); });
   }
 
+
+  // ===== 第二輪（2026-11-25）：導航鈕只開地點、拿掉「看地圖」、點站名彈出介紹、「景點」分頁改成「重要票券」 =====
+  const nameOf=a=>{ const h=a.closest("[id^=s],.stop-bonus,.stop-card,.hotel-card,li"); const nm=h&&$(".stop-feature-name-zh,.stop-name-zh,.hotel-name,.sname,.mi-name,.nm",h); return nm?nm.textContent.replace(/^📍/,"").trim():""; };
+  function fixNav(root){
+    $$("a[href]",root).forEach(a=>{
+      if(a.closest(".routes")) return;  // 全日路線維持多點路線（那是看整天路線用的）
+      const h=a.getAttribute("href"); let hit=false;
+      if(/maps\.apple\.com/.test(h)&&/[?&]daddr=/.test(h)){ const m=h.match(/daddr=(-?[\d.]+),(-?[\d.]+)/); if(m){ a.href=aPlace(m[1],m[2],nameOf(a)); hit=true; } }
+      else if(/google\.[a-z.]+\/maps\/dir\//.test(h)){ a.href=gPlace(h); hit=true; }
+      if(hit||a.closest(".stop-acts,.mi-navs,.si-a,.tl2-go")||a.classList.contains("mi-nav")) a.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=n.textContent.replace(/導航到(.+)/,"$1地圖").replace(/^導航$/,"Google 地圖").replace(/導航/g,"地圖"); });
+    });
+    // 九州舊站的地圖分頁清單只有 Google：補 Apple
+    $$("li>.mi-go+a.mi-nav:last-child",root).forEach(g=>{ const b=g.previousElementSibling, s=(DAYS[+b.dataset.day]||{stops:[]}).stops.find(x=>+x.n===+b.dataset.n); if(!s||s.lat==null) return;
+      if(g.textContent.trim()==="Google 地圖") g.textContent="Google";
+      const ap=document.createElement("a"); ap.className="mi-nav"; ap.target="_blank"; ap.rel="noopener"; ap.href=aPlace(s.lat,s.lon,s.name); ap.textContent="Apple"; g.after(ap); });
+  }
+  // 住宿卡：「導航到住處」→ Google＋Apple 兩顆，都只打開住處位置
+  hotelCards.forEach(hc=>{ const g=$(".hotel-acts a.act",hc), nm=$(".hotel-name",hc); if(!g||$(".act-apple",hc)) return;
+    const name=nm.textContent.replace(/^📍/,"").trim(), d=DAYS[+hc.dataset.day];
+    const pt=d&&[...d.stops].reverse().find(x=>x.lat!=null&&name.includes(x.name.replace(/^.*?(?=\S)/,"")));
+    g.lastChild.textContent="Google 地圖";
+    if(pt){ const ap=g.cloneNode(true); ap.classList.add("act-apple"); ap.href=aPlace(pt.lat,pt.lon,name.split("｜").pop()); ap.lastChild.textContent="Apple 地圖"; g.after(ap); } });
+  fixNav(document);
+  $$(".stop-acts [data-goto-map]").forEach(b=>b.remove());
+
+  // ---- 點站名：彈出該站介紹（小書內容全部展開，含營業時間、介紹、照片、票券、地圖鈕） ----
+  const ish=document.createElement("div"); ish.className="sheet"; ish.id="sh-stop"; ish.hidden=true;
+  ish.innerHTML=`<div class="panel" role="dialog" aria-modal="true" aria-labelledby="shStopT"><div class="wrap"><div class="panel-h"><h2 id="shStopT"></h2><button class="close" type="button" aria-label="關閉">×</button></div><div class="stop-intro"></div></div></div>`;
+  document.body.appendChild(ish);
+  ish.addEventListener("click",e=>{
+    if(e.target===ish||e.target.closest(".close")){ closeSheets(); return; }
+    const d=e.target.closest("[data-sheet]"); if(d) openSheet(d.dataset.sheet,d.dataset.at);
+  });
+  function openIntro(el){
+    const c=el.cloneNode(true); c.removeAttribute("id"); c.classList.remove("fold","open","is-now","is-next");
+    $$(".fold-btn,.now-tag",c).forEach(x=>x.remove()); $$("[id]",c).forEach(x=>x.removeAttribute("id"));
+    $$(".stop-feature-name-zh a,.stop-name-zh a",c).forEach(a=>a.replaceWith(document.createTextNode(a.textContent)));
+    const nm=$(".stop-feature-name-zh,.stop-name-zh",el), sec=el.closest(".day"), n=sec&&+sec.dataset.day, tm=$(".stop-badge .time",el);
+    $("#shStopT").innerHTML=`<span class="en">${n?`DAY ${n}`:"SPOT"}${tm&&/\d/.test(tm.textContent)?" · "+esc(tm.textContent):""}</span>${esc(nm?nm.textContent.trim():"")}`;
+    $(".stop-intro",ish).replaceChildren(c);
+    openSheet("sh-stop");
+  }
+  document.addEventListener("click",e=>{
+    const a=e.target.closest(".stop-feature-name-zh a,.stop-name-zh a"); if(!a) return;
+    const el=a.closest(".stop-feature,.stop-card,.stop-bonus"); if(!el) return;
+    e.preventDefault(); e.stopPropagation(); if(!el.closest("#sh-stop")) openIntro(el);
+  },true);
+  document.addEventListener("click",e=>{  // 地圖分頁的站名清單也改開介紹
+    const g=e.target.closest(".mi-go"); if(!g) return; const el=$(`#s${g.dataset.day}-${g.dataset.n}`); if(!el) return;
+    e.preventDefault(); e.stopPropagation(); openIntro(el);
+  },true);
+
+  // ---- 底部「景點」分頁 → 「重要票券」 ----
+  const tkTab=$('.tabbar [data-tab="spots"]');
+  if(tkTab) tkTab.innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 7h18v3.2a1.8 1.8 0 0 0 0 3.6V17H3v-3.2a1.8 1.8 0 0 0 0-3.6z"/><path d="M15 7v10" stroke-dasharray="2 2"/></svg>票券`;
+  const tv=$("#v-spots");
+  if(tv){
+    const docs=$$("#ticketDocs [data-group]"), byG=(g,d)=>docs.filter(b=>b.dataset.group===g&&(d==null||b.dataset.day===String(d)));
+    const box=(cls,ic,t,sub)=>{ const s=document.createElement("section"); s.className="tk "+cls; s.innerHTML=`<h3><span class="ic">${ic}</span>${t}${sub?`<small>${sub}</small>`:""}</h3>`; return s; };
+    const put=(s,btns)=>{ if(!btns.length) return; const w=document.createElement("div"); w.className="tk-docs"; btns.forEach(b=>w.appendChild(b)); s.appendChild(w); };
+    const more=(s,src,label,open)=>{ if(!src||!src.textContent.trim()) return; const d=document.createElement("details"); d.className="tk-more"; d.open=!!open; d.innerHTML=`<summary>${label}</summary>`; const c=src.cloneNode(true); $$("[id]",c).forEach(x=>x.removeAttribute("id")); d.appendChild(c); s.appendChild(d); };
+    const logi=id=>{ const h=$("#"+id); return h&&h.nextElementSibling&&h.nextElementSibling.classList.contains("logi")?h.nextElementSibling:null; };
+    tv.innerHTML=`<div class="sec-h"><span class="en">IMPORTANT TICKETS</span><h2>重要票券</h2></div><p class="note-line">機票、租車、訂房確認和各站的預約都在這裡。PDF 點了才打開，沒有網路也能看。</p>`;
+    // 機票
+    let s=box("tk-flight","✈️","機票"); put(s,byG("flight")); more(s,logi("flights"),"航班與行李資訊（小書）",!byG("flight").length); if(s.children.length>1) tv.appendChild(s);
+    // 租車
+    s=box("tk-car","🚗","租車"); put(s,byG("car")); more(s,logi("car"),"租車資訊（小書）",!byG("car").length); if(s.children.length>1) tv.appendChild(s);
+    // 住宿：每晚一張，確認碼／入住時間＋訂房確認信
+    s=box("tk-hotel","🏨","住宿","訂房確認碼與入住時間");
+    hotelCards.forEach(hc=>{
+      const d=+hc.dataset.day, nm=$(".hotel-name",hc); if(!nm) return;
+      const r=document.createElement("div"); r.className="tk-row";
+      const lines=$$(".hotel-line",hc).filter(l=>/確認|預訂|訂房|訂位|PIN|入住|退房|報到|代碼/.test(l.textContent)).map(l=>`<li>${l.innerHTML}</li>`).join("");
+      r.innerHTML=`<div class="tk-d">${esc(($(".hotel-day",hc)||{}).textContent||"")}</div><div class="tk-n">${esc(nm.textContent.replace(/^📍/,"").trim())}</div>${lines?`<ul>${lines}</ul>`:""}`;
+      put(r,byG("hotel",d)); s.appendChild(r);
+    });
+    put(s,docs.filter(b=>b.dataset.group==="hotel"&&!hotelCards.some(hc=>String(hc.dataset.day)===b.dataset.day)));
+    if(s.children.length>1) tv.appendChild(s);
+    // 門票與預約：各站的已購票卡、電子票 QR、憑證 PDF
+    s=box("tk-other","🎫","門票與預約","點站名看該站介紹");
+    $$("#v-plan .day").forEach(sec=>{ const n=+sec.dataset.day;
+      $$(".stop-feature,.stop-card,.stop-bonus",sec).forEach(el=>{
+        const parts=$$(".ticket-box,.stop-feature-inset",el); if(!parts.length) return;
+        const nm=$(".stop-feature-name-zh,.stop-name-zh",el), tm=$(".stop-badge .time",el);
+        const r=document.createElement("div"); r.className="tk-row";
+        r.innerHTML=`<div class="tk-d">DAY ${n}${tm&&/\d/.test(tm.textContent)?" · "+esc(tm.textContent):""}</div><button type="button" class="tk-n tk-go">${esc(nm?nm.textContent.trim():"")} ›</button>`;
+        r.querySelector(".tk-go").onclick=()=>openIntro(el);
+        parts.forEach(p=>{ const c=p.cloneNode(true); c.classList.remove("fold"); $$("[id]",c).forEach(x=>x.removeAttribute("id")); r.appendChild(c); });
+        s.appendChild(r);
+      });
+    });
+    put(s,byG("other")); if(s.children.length>1) tv.appendChild(s);
+    tv.addEventListener("click",e=>{ const d=e.target.closest("[data-sheet]"); if(d&&!docs.includes(d)) openSheet(d.dataset.sheet,d.dataset.at); });
+  }
   // ---- 覆寫：今天行程卡取代舊的三站預覽與騎乘卡 ----
   const _rt=renderToday;  // 原本的會填倒數卡（幾天後出發），保留
   renderToday=function(){ _rt(); renderTL(); };
