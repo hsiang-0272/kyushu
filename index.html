@@ -630,6 +630,8 @@ body.live #v-home .cover,body.live #v-home .ticket{display:none}
 #v-spots .tk-more summary{font-size:13.5px;color:var(--gold-d);cursor:pointer}
 #v-spots .tk-more .logi{margin-top:8px}
 #sh-stop .stop-badge{display:none}
+.doc-err{color:#A23B2A;font-size:13px;margin:4px 0}
+#v-plan .day .flow>.tips-box{display:block!important}
 /*UXV2-CSS-END*/
 </style>
 </head>
@@ -2482,18 +2484,9 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
       const imgs=$$(".photo-grid img,.anime-compare img",s).length;
       const hasMore=imgs||$(".stop-feature-lede,.history-block,.stop-feature-meta,.sinfo",s);
       if(!hasMore) return;
-      s.classList.add("fold");
-      const b=document.createElement("button"); b.type="button"; b.className="fold-btn";
-      b.innerHTML=`<span class="chev">▾</span><span class="fl">${s.classList.contains("bar-card")?"步行・營業時間・價格・介紹":"營業時間・介紹"}${imgs?`・照片 ${imgs} 張`:""}</span>`;
-      b.onclick=()=>s.classList.toggle("open");
-      const acts=$(":scope>.stop-acts",s); if(acts) acts.after(b); else s.appendChild(b);
+      s.classList.add("fold");  // 2026-11-25 第三輪：不放「營業時間・介紹・照片」展開鈕，點站名就彈出介紹視窗
     });
     const r=$(".routes",sec); if(r){ r.classList.add("rfold"); const k=$(".kit-h",r); if(k) k.onclick=()=>r.classList.toggle("rfold"); }
-    const tb=document.createElement("div"); tb.className="day-tools";
-    tb.innerHTML=`<button type="button" aria-pressed="false">全部展開：介紹與照片</button>`;
-    const btn=tb.firstElementChild;
-    btn.onclick=()=>{ const on=!sec.classList.contains("allopen"); sec.classList.toggle("allopen",on); $$(".fold",sec).forEach(s=>s.classList.toggle("open",on)); btn.setAttribute("aria-pressed",String(on)); btn.textContent=on?"全部收起":"全部展開：介紹與照片"; };
-    const nav=$(".stopnav",sec); (nav||$(".day-hero",sec)).after(tb);
   });
   function markPlan(){
     $$("#v-plan .is-now,#v-plan .is-next").forEach(e=>e.classList.remove("is-now","is-next"));
@@ -2597,6 +2590,23 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
     put(s,byG("other")); if(s.children.length>1) tv.appendChild(s);
     tv.addEventListener("click",e=>{ const d=e.target.closest("[data-sheet]"); if(d&&!docs.includes(d)) openSheet(d.dataset.sheet,d.dataset.at); });
   }
+  // ---- 票券 PDF 頁：各自加密存成 docs/*.bin，打開視窗時才用解鎖時的金鑰解開（網頁本體維持小檔，iPhone 才開得起來） ----
+  async function docKey(){
+    const ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+    let raw=window.__TK__; if(!raw){ try{ const s=sessionStorage.getItem("twa-doc-key")||localStorage.getItem(META.cache+"-key"); if(s) raw=ub(s); }catch(e){} }
+    return raw?crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]):null;
+  }
+  async function openDocs(sh){
+    const imgs=$$("img[data-enc]:not([src])",sh); if(!imgs.length) return;
+    let key=null; try{ key=await docKey(); }catch(e){}
+    for(const im of imgs){
+      try{ if(!key) throw 0; const buf=new Uint8Array(await (await fetch(im.dataset.enc)).arrayBuffer());
+        const png=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(0,12)},key,buf.slice(12));
+        im.src=URL.createObjectURL(new Blob([png],{type:"image/png"})); }
+      catch(e){ const f=im.closest("figure"); if(f&&!$(".doc-err",f)){ const m=document.createElement("p"); m.className="doc-err"; m.textContent="這一頁暫時打不開：請連上網路重新打開網站一次再試。"; f.prepend(m); } }
+    }
+  }
+  document.addEventListener("click",e=>{ const b=e.target.closest('[data-sheet^="sh-doc-"]'); if(b) openDocs($("#"+b.dataset.sheet)); },true);
   // ---- 覆寫：今天行程卡取代舊的三站預覽與騎乘卡 ----
   const _rt=renderToday;  // 原本的會填倒數卡（幾天後出發），保留
   renderToday=function(){ _rt(); renderTL(); };
