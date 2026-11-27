@@ -645,6 +645,10 @@ body.live #v-home .cover,body.live #v-home .ticket{display:none}
 #v-check .chk-h{font-size:16px;color:var(--navy);margin:6px 0 8px}
 #v-check .chk-foot{font-size:12.5px;color:var(--ink3);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:20px}
 #v-check .chk-reset{border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--navy)}
+/* 地圖併入行程頁：兩顆按鈕 */
+#v-plan .plan-maps{display:flex;gap:8px;margin:12px 0 6px}
+#v-plan .plan-maps button{flex:1;border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:8px 6px;font-size:14px;font-weight:700;color:var(--navy)}
+#sh-allmap .mapfig img{display:block;width:100%;height:auto}
 /*UXV2-CSS-END*/
 </style>
 </head>
@@ -2620,6 +2624,28 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
     }
   }
   document.addEventListener("click",e=>{ const b=e.target.closest('[data-sheet^="sh-doc-"]'); if(b) openDocs($("#"+b.dataset.sheet)); },true);
+  // ---- 地圖分頁併入行程（使用者 2026-11-27）：每天路線圖放在行程頁當天標題下，全程路線圖改彈出視窗，底部拿掉「地圖」 ----
+  const mapTab=$('.tabbar [data-tab="map"]');
+  if(mapTab){
+    // 當天地圖是直式大圖，直接放會佔滿一整個畫面 → 改成按鈕，點了用可放大的看圖視窗打開
+    $$("#v-plan .day").forEach(sec=>{ const n=sec.dataset.day, md=$(`#mapDays .mapday[data-day="${n}"]`), im=md&&$(".mapfig img",md);
+      const row=document.createElement("div"); row.className="plan-maps";
+      if(im){ const b=document.createElement("button"); b.type="button"; b.textContent="🗺 今天路線圖"; b.onclick=()=>openLb(im.getAttribute("src")); row.appendChild(b); }
+      const hero=$(".day-hero",sec); if(hero) hero.after(row); else sec.prepend(row); });
+    const all=$("#mapAll");
+    if(all){
+      const sh=document.createElement("div"); sh.className="sheet"; sh.id="sh-allmap"; sh.hidden=true;
+      sh.innerHTML=`<div class="panel" role="dialog" aria-modal="true" aria-labelledby="shAllMapT"><div class="wrap"><div class="panel-h"><h2 id="shAllMapT"><span class="en">FULL JOURNEY</span>全程路線圖</h2><button class="close" type="button" aria-label="關閉">×</button></div></div></div>`;
+      const w=$(".wrap",sh); while(all.firstChild) w.appendChild(all.firstChild); document.body.appendChild(sh);
+      sh.addEventListener("click",e=>{ if(e.target===sh||e.target.closest(".close")) closeSheets(); });
+      $$("#v-plan .plan-maps").forEach(row=>{ const b=document.createElement("button"); b.type="button"; b.textContent="🧭 全程路線圖";
+        b.onclick=()=>openSheet("sh-allmap"); row.appendChild(b); });
+    }
+    mapTab.remove(); const mi=TABS.indexOf("map"); if(mi>=0) TABS.splice(mi,1);
+    const stay=$('.tabbar [data-tab="stay"]'), home=$(".tabbar .tab.home"); if(stay&&home) home.before(stay);
+    const _st0=setTab; setTab=function(t){ if(t==="map"){ $("#sh-allmap")?openSheet("sh-allmap"):_st0("plan"); return; } _st0(t); };
+  }
+
   // ---- 「清單」分頁：行前打包 check list（使用者 2026-11-27 提供的清單，照原文；勾選只存在這支手機） ----
   const CHK=["護照","駕照正本、譯本正本","皮夾（外幣現金、信用卡）","eSIM","保險（旅平險+旅遊不便險）","行李秤","確認行李尺寸重量（托運、手提）",
     "換洗衣物（隨天氣預報、天數準備）","保暖衣物（太極內裡、圍脖、發熱衣褲）","鞋子","雨傘","充電設備（包含行動電源、車充頭USB-A、Garmin）","保健食品",
@@ -2634,7 +2660,7 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
     const b=document.createElement("button"); b.className="tab"; b.type="button"; b.dataset.tab="check";
     b.innerHTML=`<svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 9l1.6 1.6L12.5 7.7M8 15l1.6 1.6 2.9-2.9M14.5 9.5H17M14.5 15.5H17"/></svg>清單`;
     b.addEventListener("click",()=>{ closeSheets(); setTab("check"); }); tbIn.appendChild(b);
-    tbIn.style.gridTemplateColumns="repeat(6,1fr)";
+    tbIn.style.gridTemplateColumns=`repeat(${tbIn.children.length},1fr)`;
     const key=s=>"chk:"+s, isOn=s=>store.get(key(s))==="1";
     const li=s=>`<li><label><input type="checkbox" data-chk="${esc(s)}"${isOn(s)?" checked":""}><span>${esc(s)}</span></label></li>`;
     const all=()=>CHK.concat(moto?CHK_MOTO:[]);
