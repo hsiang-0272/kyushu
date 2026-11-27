@@ -632,6 +632,19 @@ body.live #v-home .cover,body.live #v-home .ticket{display:none}
 #sh-stop .stop-badge{display:none}
 .doc-err{color:#A23B2A;font-size:13px;margin:4px 0}
 #v-plan .day .flow>.tips-box{display:block!important}
+/* 清單分頁 */
+#v-check .chk-prog{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink2);margin:0 0 10px}
+#v-check .chk-prog b{color:var(--navy);font-size:16px}
+#v-check .chk-prog .bar{flex:1;height:6px;border-radius:3px;background:var(--gold-l);overflow:hidden}
+#v-check .chk-prog .bar i{display:block;height:100%;background:var(--navy)}
+#v-check .chk{list-style:none;margin:0 0 14px;padding:0;border:1px solid var(--gold-l);border-radius:12px;background:var(--card)}
+#v-check .chk li+li{border-top:1px dotted var(--rule)}
+#v-check .chk label{display:flex;align-items:center;gap:12px;padding:12px 14px;font-size:15.5px;line-height:1.45;cursor:pointer}
+#v-check .chk input{width:22px;height:22px;flex:none;accent-color:var(--navy)}
+#v-check .chk input:checked+span{color:var(--ink3);text-decoration:line-through}
+#v-check .chk-h{font-size:16px;color:var(--navy);margin:6px 0 8px}
+#v-check .chk-foot{font-size:12.5px;color:var(--ink3);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+#v-check .chk-reset{border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--navy)}
 /*UXV2-CSS-END*/
 </style>
 </head>
@@ -2607,6 +2620,38 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
     }
   }
   document.addEventListener("click",e=>{ const b=e.target.closest('[data-sheet^="sh-doc-"]'); if(b) openDocs($("#"+b.dataset.sheet)); },true);
+  // ---- 「清單」分頁：行前打包 check list（使用者 2026-11-27 提供的清單，照原文；勾選只存在這支手機） ----
+  const CHK=["護照","駕照正本、譯本正本","皮夾（外幣現金、信用卡）","eSIM","保險（旅平險+旅遊不便險）","行李秤","確認行李尺寸重量（托運、手提）",
+    "換洗衣物（隨天氣預報、天數準備）","保暖衣物（太極內裡、圍脖、發熱衣褲）","鞋子","雨傘","充電設備（包含行動電源、車充頭USB-A、Garmin）","保健食品",
+    "藥品（如頭痛藥、胃藥）","隱形眼鏡、保養液、眼鏡盒、墨鏡","洗髮精、洗面乳","筋膜球、痠痛藥膏","蒸汽眼罩、耳塞、止鼾貼","護唇膏","御朱印帳、御城印帳",
+    "電子書","旅遊小書、AI網頁","手持風扇","掛包娃"];
+  const CHK_MOTO=["安全帽","耳機充電線","團服","滑衣褲","頭套","手套兩雙","車靴","洗衣球"];
+  const moto = META.moto!=null ? !!META.moto : JSON.stringify(DAYS).includes("🏍");  // 舊站沒有 META.moto：看騎乘里程符號
+  const main=$("main"), tbIn=$(".tabbar .in");
+  if(main&&tbIn&&!$("#v-check")){
+    TABS.push("check");
+    const v=document.createElement("div"); v.className="view wrap"; v.id="v-check"; v.hidden=true; main.appendChild(v);
+    const b=document.createElement("button"); b.className="tab"; b.type="button"; b.dataset.tab="check";
+    b.innerHTML=`<svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 9l1.6 1.6L12.5 7.7M8 15l1.6 1.6 2.9-2.9M14.5 9.5H17M14.5 15.5H17"/></svg>清單`;
+    b.addEventListener("click",()=>{ closeSheets(); setTab("check"); }); tbIn.appendChild(b);
+    tbIn.style.gridTemplateColumns="repeat(6,1fr)";
+    const key=s=>"chk:"+s, isOn=s=>store.get(key(s))==="1";
+    const li=s=>`<li><label><input type="checkbox" data-chk="${esc(s)}"${isOn(s)?" checked":""}><span>${esc(s)}</span></label></li>`;
+    const all=()=>CHK.concat(moto?CHK_MOTO:[]);
+    function renderChk(){
+      const n=all().filter(isOn).length, N=all().length;
+      v.innerHTML=`<div class="sec-h"><span class="en">CHECK LIST</span><h2>旅遊AI提醒事項</h2></div>
+        <div class="chk-prog"><b>${n} / ${N}</b> 已準備好<span class="bar"><i style="width:${N?n/N*100:0}%"></i></span></div>
+        <ul class="chk">${CHK.map(li).join("")}</ul>
+        ${moto?`<h3 class="chk-h">🏍 機車旅行</h3><ul class="chk">${CHK_MOTO.map(li).join("")}</ul>`:""}
+        <div class="chk-foot">勾選只存在這支手機。<button type="button" class="chk-reset">${v.dataset.confirm?"確定全部取消勾選？再按一次":"全部取消勾選"}</button></div>`;
+    }
+    v.addEventListener("change",e=>{ const c=e.target.closest("[data-chk]"); if(!c) return; store.set(key(c.dataset.chk),c.checked?"1":""); v.dataset.confirm=""; renderChk(); });
+    v.addEventListener("click",e=>{ if(!e.target.closest(".chk-reset")) return;
+      if(v.dataset.confirm){ all().forEach(s=>store.set(key(s),"")); v.dataset.confirm=""; } else v.dataset.confirm="1"; renderChk(); });
+    renderChk();
+    const _st=setTab; setTab=function(t){ _st(t); if(t==="check") $("#top").classList.add("nostrip"); };
+  }
   // ---- 覆寫：今天行程卡取代舊的三站預覽與騎乘卡 ----
   const _rt=renderToday;  // 原本的會填倒數卡（幾天後出發），保留
   renderToday=function(){ _rt(); renderTL(); };
