@@ -551,7 +551,7 @@ main{padding-bottom:calc(var(--nav-h) + 36px + env(safe-area-inset-bottom,0px))}
 
 /* 首頁：舊的騎乘卡、三站預覽、功能總覽格子不再顯示；旅途中不顯示封面與倒數 */
 #ride,.today,#v-home .features{display:none!important}
-body.live #v-home .cover,body.live #v-home .ticket{display:none}
+body.live #v-home .ticket{display:none}  /* 封面 2026-11-27 起一律放最上面 */
 #v-home .banner{padding:10px 14px;min-height:0}
 #v-home .banner .ic{width:30px;height:auto}
 #v-home .banner .s{display:none}
@@ -649,6 +649,13 @@ body.live #v-home .cover,body.live #v-home .ticket{display:none}
 #v-plan .plan-maps{display:flex;gap:8px;margin:12px 0 6px}
 #v-plan .plan-maps button{flex:1;border:1px solid var(--gold);background:var(--card);border-radius:999px;padding:8px 6px;font-size:14px;font-weight:700;color:var(--navy)}
 #sh-allmap .mapfig img{display:block;width:100%;height:auto}
+/* 首頁上方兩顆按鈕：隨手工具、天氣穿搭 */
+#v-home .cover{margin-top:0}
+.home-qb{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 14px}
+.home-qb button{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--gold);background:var(--card);border-radius:12px;padding:12px 8px;font-size:15.5px;font-weight:700;color:var(--navy)}
+.home-qb .i{font-size:20px}
+#sh-tools .tools{border:0;padding:0;margin:0;background:none}
+#v-check .chk-notes{margin-top:22px}
 /*UXV2-CSS-END*/
 </style>
 </head>
@@ -2429,10 +2436,21 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
 
   // ---- 今天行程卡 ----
   const card=document.createElement("section"); card.className="tl2"; card.id="tl2"; card.setAttribute("aria-label","今天行程");
+  // 首頁順序（使用者 2026-11-27）：封面 → 「隨手工具／天氣穿搭」兩顆按鈕 → 倒數卡 → 今天行程卡 → 其他
   const home=$("#v-home"), tick=$(".ticket",home), cover=$(".cover",home);
   if(tick){ home.prepend(tick); tick.after(card); } else home.prepend(card);
-  const tools=$(".tools",home); if(tools) card.after(tools);
-  if(cover) home.appendChild(cover);  // 封面移到最下面，不再擋住行程
+  const qb=document.createElement("div"); qb.className="home-qb";
+  qb.innerHTML=`<button type="button" data-qb="tools"><span class="i">🧰</span>隨手工具</button><button type="button" data-qb="wx"><span class="i">🌤</span>天氣穿搭</button>`;
+  home.prepend(qb); if(cover) home.prepend(cover);
+  // 隨手工具整塊搬進彈出視窗（按鈕、定位分享的事件跟著搬，不用重綁）
+  const tools=$(".tools",home);
+  if(tools){ const sh=document.createElement("div"); sh.className="sheet"; sh.id="sh-tools"; sh.hidden=true;
+    sh.innerHTML=`<div class="panel" role="dialog" aria-modal="true" aria-labelledby="shToolsT"><div class="wrap"><div class="panel-h"><h2 id="shToolsT"><span class="en">TOOLS</span>隨手工具</h2><button class="close" type="button" aria-label="關閉">×</button></div></div></div>`;
+    const kh=$(".kit-h",tools); if(kh) kh.remove(); $(".wrap",sh).appendChild(tools); document.body.appendChild(sh);
+    sh.addEventListener("click",e=>{ if(e.target===sh||e.target.closest(".close")) closeSheets(); }); }
+  qb.addEventListener("click",e=>{ const b=e.target.closest("[data-qb]"); if(!b) return; openSheet(b.dataset.qb==="tools"?"sh-tools":"sh-weather"); });
+  // 首頁的「旅遊須知」「天氣穿搭」長條按鈕不再顯示（天氣改上方按鈕、須知併到清單分頁）；元素保留給天氣摘要程式寫入
+  $$('#v-home .banner[data-sheet="sh-notes"],#v-home .banner[data-sheet="sh-weather"]').forEach(b=>b.hidden=true);
   let gps="";
   const navBtns=(g,pt,q)=>`<div class="tl2-go">${g?`<a href="${esc(gPlace(g))}" target="_blank" rel="noopener">Google</a>`:""}${pt&&pt.lat!=null?`<a class="ap" href="${esc(aPlace(pt.lat,pt.lon,q||pt.name))}" target="_blank" rel="noopener">Apple</a>`:""}</div>`;
   function status(n){
@@ -2666,12 +2684,17 @@ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==
     const all=()=>CHK.concat(moto?CHK_MOTO:[]);
     function renderChk(){
       const n=all().filter(isOn).length, N=all().length;
-      v.innerHTML=`<div class="sec-h"><span class="en">CHECK LIST</span><h2>旅遊AI提醒事項</h2></div>
+      v.innerHTML=`<div class="sec-h"><span class="en">CHECK LIST</span><h2>提醒事項</h2></div>
         <div class="chk-prog"><b>${n} / ${N}</b> 已準備好<span class="bar"><i style="width:${N?n/N*100:0}%"></i></span></div>
         <ul class="chk">${CHK.map(li).join("")}</ul>
         ${moto?`<h3 class="chk-h">🏍 機車旅行</h3><ul class="chk">${CHK_MOTO.map(li).join("")}</ul>`:""}
         <div class="chk-foot">勾選只存在這支手機。<button type="button" class="chk-reset">${v.dataset.confirm?"確定全部取消勾選？再按一次":"全部取消勾選"}</button></div>`;
+      if(notes) v.appendChild(notes);
     }
+    // 旅遊須知（預估花費、注意事項）併到清單分頁下方（使用者 2026-11-27）；右上選單的須知視窗照舊可開
+    const ns=$("#sh-notes .notes-sec"); let notes=null;
+    if(ns){ notes=document.createElement("div"); notes.className="chk-notes"; notes.innerHTML=`<div class="sec-h"><span class="en">TRAVEL NOTES</span><h2>旅遊須知</h2></div>`;
+      const c=ns.cloneNode(true); $$("[id]",c).forEach(x=>x.removeAttribute("id")); notes.appendChild(c); }
     v.addEventListener("change",e=>{ const c=e.target.closest("[data-chk]"); if(!c) return; store.set(key(c.dataset.chk),c.checked?"1":""); v.dataset.confirm=""; renderChk(); });
     v.addEventListener("click",e=>{ if(!e.target.closest(".chk-reset")) return;
       if(v.dataset.confirm){ all().forEach(s=>store.set(key(s),"")); v.dataset.confirm=""; } else v.dataset.confirm="1"; renderChk(); });
